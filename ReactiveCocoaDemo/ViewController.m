@@ -34,16 +34,26 @@
     RACSignal *userName = self.userNameField.rac_textSignal;
     RACSignal *passWord = self.passWordField.rac_textSignal;
     
+    @weakify(self);
     [[RACSignal combineLatest:@[userName,passWord]]
                  subscribeNext:^(RACTuple *x) {
                      
+                     @strongify(self);
                      NSString *name = x.first;
                      NSString *pwd = x.second;
-                     NSLog(@"name %@,pwd %@",name,pwd);
+                     NSLog(@"name: %@,pwd: %@",name,pwd);
                      
                      self.loginBtn.enabled = name.length && pwd.length;
          
      }];
+    
+    [[_loginBtn rac_signalForControlEvents:UIControlEventTouchUpInside]
+                 subscribeNext:^(id x) {
+                     SEDLog(@"登录");
+        
+        
+    }];
+    
 }
 
 
@@ -60,7 +70,6 @@
         _userNameField.leftView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"username_icon"]];
         _userNameField.leftViewMode = UITextFieldViewModeAlways;
         _userNameField.clearButtonMode = UITextFieldViewModeWhileEditing;
-//        _userNameField.borderStyle = UITextBorderStyleRoundedRect;
         
     }
     return _userNameField;
@@ -80,8 +89,6 @@
         _passWordField.leftViewMode = UITextFieldViewModeAlways;
         _passWordField.secureTextEntry = YES;
         _passWordField.clearButtonMode = UITextFieldViewModeWhileEditing;
-//        _passWordField.placeholder
-//        _passWordField.borderStyle = UITextBorderStyleRoundedRect;
     }
     return _passWordField;
 }
@@ -89,16 +96,19 @@
 -(UIButton *)loginBtn{
     
     if (!_loginBtn) {
-        
+        //顺序是内容,sizeToFit,位置,否则位置容易出误差
         _loginBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-//        [_loginBtn setTitle:@"Login" forState:UIControlStateNormal];
-//        [_loginBtn setTitleColor:black_color forState:UIControlStateNormal];
-        _loginBtn.centerX = self.view.centerX;
-        _loginBtn.top = self.passWordField.bottom + 20;
         [_loginBtn setImage:[UIImage imageNamed:@"login_icon"] forState:UIControlStateNormal];
         [_loginBtn sizeToFit];
+        _loginBtn.centerX = SCREEN_WIDTH*0.5;
+        _loginBtn.top = self.passWordField.bottom + 20;
     }
     return _loginBtn;
+}
+
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+    
+    [self.view endEditing:YES];
 }
 
 -(void)demo1{
